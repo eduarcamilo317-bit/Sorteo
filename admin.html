@@ -2,7 +2,8 @@
 <html lang="es">
 
 <head>
-
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -205,7 +206,6 @@ document.getElementById("resultado").innerHTML = html;
 
 function descargar(){
 
-
 if(asignaciones.length === 0){
 
 alert("Primero debe realizar el sorteo.");
@@ -215,35 +215,56 @@ return;
 }
 
 
-
-let contenido = JSON.stringify(
-asignaciones,
-null,
-2
+// Clave secreta del sorteo
+let clave = prompt(
+"Ingrese una contraseña para cifrar el archivo:"
 );
 
 
+if(!clave){
+
+alert("Debe ingresar una contraseña.");
+
+return;
+
+}
+
+
+// Convertir datos a texto
+
+let datos = JSON.stringify(asignaciones);
+
+
+// Cifrar
+
+let cifrado = CryptoJS.AES.encrypt(
+datos,
+clave
+).toString();
+
+
+// Crear archivo
 
 let archivo = new Blob(
-[contenido],
+[cifrado],
 {
-type:"application/json"
+type:"text/plain"
 }
 );
 
 
+// Descargar
 
-let enlace = document.createElement("a");
+let enlace=document.createElement("a");
 
+enlace.href=URL.createObjectURL(archivo);
 
-enlace.href = URL.createObjectURL(archivo);
-
-
-enlace.download = "asignaciones.json";
-
+enlace.download="asignaciones.enc";
 
 enlace.click();
 
+
+alert("Archivo cifrado generado correctamente.");
 
 }
 
