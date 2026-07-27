@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Administrador - Sorteo de Ingredientes</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+<div class="contenedor">
+
+<h1>⚙️ Panel Administrador</h1>
+
+<p>
+Realiza el sorteo secreto de ingredientes.
+</p>
+
+
+<h3>👥 Lista de personas</h3>
+
+<textarea 
+id="personas"
+placeholder="Escribe una persona por línea:
+
+Ana
+Juan
+Carlos
+Laura">
+</textarea>
+
+
+
+<h3>🥕 Lista de ingredientes</h3>
+
+<textarea 
+id="ingredientes"
+placeholder="Escribe un ingrediente por línea:
+
+Tomate
+Queso
+Cebolla
+Pimentón">
+</textarea>
+
+
+
+<button onclick="sortear()">
+🎲 Realizar sorteo
+</button>
+
+
+<div id="resultado"></div>
+
+
+
+<button onclick="descargar()">
+⬇️ Descargar códigos
+</button>
+
+
+</div>
+
+
+
+<script>
+
+let asignaciones = [];
+
+
+
+function generarCodigo(){
+
+return Math.random()
+.toString(36)
+.substring(2,8)
+.toUpperCase();
+
+}
+
+
+
+function sortear(){
+
+
+let personas = document
+.getElementById("personas")
+.value
+.split("\n")
+.map(x => x.trim())
+.filter(x => x !== "");
+
+
+
+let ingredientes = document
+.getElementById("ingredientes")
+.value
+.split("\n")
+.map(x => x.trim())
+.filter(x => x !== "");
+
+
+
+if(personas.length === 0 || ingredientes.length === 0){
+
+alert("Debe ingresar personas e ingredientes.");
+
+return;
+
+}
+
+
+
+if(personas.length !== ingredientes.length){
+
+alert(
+"Debe haber la misma cantidad de personas e ingredientes."
+);
+
+return;
+
+}
+
+
+
+// Mezclar ingredientes aleatoriamente
+
+ingredientes.sort(
+() => Math.random() - 0.5
+);
+
+
+
+asignaciones = [];
+
+
+
+for(let i = 0; i < personas.length; i++){
+
+
+asignaciones.push({
+
+persona: personas[i],
+
+codigo: generarCodigo(),
+
+ingrediente: ingredientes[i]
+
+});
+
+
+}
+
+
+
+mostrarResultados();
+
+
+}
+
+
+
+
+function mostrarResultados(){
+
+
+let html = "<h3>🔐 Códigos generados</h3>";
+
+
+
+asignaciones.forEach(persona => {
+
+
+html += `
+
+<div class="tarjeta">
+
+<b>${persona.persona}</b><br>
+
+Código:
+<strong>${persona.codigo}</strong>
+
+</div>
+
+`;
+
+});
+
+
+
+document.getElementById("resultado").innerHTML = html;
+
+
+}
+
+
+
+
+function descargar(){
+
+
+if(asignaciones.length === 0){
+
+alert("Primero debe realizar el sorteo.");
+
+return;
+
+}
+
+
+
+let contenido = JSON.stringify(
+asignaciones,
+null,
+2
+);
+
+
+
+let archivo = new Blob(
+[contenido],
+{
+type:"application/json"
+}
+);
+
+
+
+let enlace = document.createElement("a");
+
+
+enlace.href = URL.createObjectURL(archivo);
+
+
+enlace.download = "asignaciones.json";
+
+
+enlace.click();
+
+
+}
+
+
+
+</script>
+
+
+</body>
+
+</html>
