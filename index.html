@@ -1,40 +1,201 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sorteo de Ingredientes</title>
+<title>Mi Ingrediente Secreto</title>
 
 <link rel="stylesheet" href="style.css">
 
+
+<!-- Librería para descifrar AES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
 </head>
+
 
 <body>
 
+
 <div class="contenedor">
 
-<h1>🍕 Sorteo de Ingredientes</h1>
+
+<h1>🥕 Mi Ingrediente Secreto</h1>
+
 
 <p>
-Ingresa el código que recibiste.
+Ingresa tu código para conocer tu ingrediente.
 </p>
 
-<input
+
+<input 
 type="text"
 id="codigo"
-placeholder="Ejemplo: X7D92A">
+placeholder="Código secreto">
 
-<button onclick="buscar()">
-Ver mi ingrediente
+
+<input 
+type="password"
+id="clave"
+placeholder="Contraseña del sorteo">
+
+
+
+<button onclick="buscarIngrediente()">
+🔎 Consultar
 </button>
+
+
 
 <div id="resultado"></div>
 
+
 </div>
 
-<script src="script.js"></script>
+
+
+<script>
+
+
+async function buscarIngrediente(){
+
+
+let codigo = document
+.getElementById("codigo")
+.value
+.trim()
+.toUpperCase();
+
+
+
+let clave = document
+.getElementById("clave")
+.value;
+
+
+
+if(codigo==="" || clave===""){
+
+alert("Ingrese código y contraseña.");
+
+return;
+
+}
+
+
+
+try{
+
+
+// Leer archivo cifrado
+
+let respuesta = await fetch("asignaciones.enc");
+
+
+let archivo = await respuesta.text();
+
+
+
+// Descifrar AES
+
+let datos = CryptoJS.AES.decrypt(
+archivo,
+clave
+);
+
+
+
+let texto = datos.toString(
+CryptoJS.enc.Utf8
+);
+
+
+
+if(!texto){
+
+throw new Error();
+
+}
+
+
+
+// Convertir JSON
+
+let asignaciones = JSON.parse(texto);
+
+
+
+let encontrado = false;
+
+
+
+for(let persona of asignaciones){
+
+
+if(persona.codigo === codigo){
+
+
+document.getElementById("resultado").innerHTML = `
+
+<h2>✅ Tu ingrediente es:</h2>
+
+<div class="ingrediente">
+
+🥘 ${persona.ingrediente}
+
+</div>
+
+`;
+
+encontrado=true;
+
+break;
+
+
+}
+
+
+}
+
+
+
+if(!encontrado){
+
+
+document.getElementById("resultado").innerHTML=
+
+"❌ Código no encontrado.";
+
+
+}
+
+
+
+}
+
+
+catch(error){
+
+
+document.getElementById("resultado").innerHTML=
+
+"❌ Contraseña incorrecta o archivo inválido.";
+
+
+}
+
+
+
+}
+
+
+
+</script>
+
 
 </body>
+
 </html>
